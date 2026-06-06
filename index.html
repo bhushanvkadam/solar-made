@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SolarMade — We make brands impossible to scroll past.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080810;--bg2:#0d0d1a;--bg3:#111124;--indigo:#5B4FE8;--indigo-light:#7B70F5;--cyan:#00D4FF;--white:#EEEEF5;--muted:#8888a0;--border:rgba(255,255,255,0.07);--card-bg:rgba(255,255,255,0.03);--radius:16px;--font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--ease:cubic-bezier(0.23,1,0.32,1)}
+[data-theme="light"]{--bg:#EEEEF5;--bg2:#E4E4EF;--bg3:#F5F5FA;--white:#080810;--muted:#5a5a78;--border:rgba(0,0,0,0.08);--card-bg:rgba(0,0,0,0.03)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--bg);color:var(--white);font-family:var(--font-body);font-size:16px;line-height:1.6;overflow-x:hidden;cursor:none}
+
+#cursor{position:fixed;width:10px;height:10px;background:var(--cyan);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference;transition:width .3s,height .3s}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1.5px solid var(--cyan);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);opacity:.5;transition:width .3s,height .3s}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:24px 48px;display:flex;justify-content:space-between;align-items:center;transition:all .4s var(--ease)}
+nav.scrolled{padding:14px 48px;background:rgba(8,8,16,0.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+[data-theme="light"] nav.scrolled{background:rgba(238,238,245,0.8)}
+.nav-logo{font-family:var(--font-head);font-weight:800;font-size:20px;color:var(--white);text-decoration:none;letter-spacing:-.5px}
+.nav-logo span{color:var(--cyan)}
+.nav-links{display:flex;gap:36px;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--cyan);transition:width .3s var(--ease)}
+.nav-links a:hover{color:var(--white)}
+.nav-links a:hover::after{width:100%}
+.theme-btn{background:var(--card-bg);border:1px solid var(--border);border-radius:100px;padding:8px 16px;cursor:pointer;color:var(--muted);font-size:13px;font-family:var(--font-body);transition:all .3s;display:flex;align-items:center;gap:6px}
+.theme-btn:hover{color:var(--white);border-color:var(--indigo)}
+
+/* HERO */
+#hero{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-content{position:relative;z-index:2;text-align:center;max-width:860px;padding:0 24px}
+.hero-eyebrow{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);margin-bottom:32px;opacity:0;animation:fadeUp .8s .3s forwards}
+.hero-title{font-family:var(--font-head);font-size:clamp(48px,7vw,92px);font-weight:800;line-height:1.0;letter-spacing:-2px;margin-bottom:32px;color:var(--white)}
+.hero-title .line{overflow:hidden;display:block}
+.hero-title .word{display:inline-block;transform:translateY(110%);animation:slideUp .9s var(--ease) forwards}
+.hero-title em{font-style:normal;color:var(--indigo-light)}
+.hero-sub{font-size:17px;color:var(--muted);max-width:500px;margin:0 auto 52px;opacity:0;animation:fadeUp .8s 1.2s forwards;line-height:1.75}
+.hero-cta{display:flex;gap:16px;justify-content:center;opacity:0;animation:fadeUp .8s 1.5s forwards}
+.btn-primary{background:var(--indigo);color:#fff;border:none;padding:15px 34px;border-radius:100px;font-size:15px;font-weight:500;cursor:pointer;position:relative;overflow:hidden;font-family:var(--font-body);transition:transform .2s}
+.btn-primary::before{content:'';position:absolute;inset:0;background:var(--indigo-light);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
+.btn-primary:hover::before{transform:scaleX(1)}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-primary span{position:relative;z-index:1}
+.btn-ghost{background:transparent;color:var(--white);border:1px solid var(--border);padding:15px 34px;border-radius:100px;font-size:15px;font-weight:500;cursor:pointer;transition:all .3s;font-family:var(--font-body)}
+.btn-ghost:hover{border-color:var(--indigo);color:var(--indigo-light)}
+
+/* SCROLL INDICATOR — sits below CTA, centred, clear */
+.hero-scroll{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:fadeUp .8s 2s forwards;margin-top:60px}
+.hero-scroll-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
+.scroll-bar{width:1px;height:48px;background:linear-gradient(to bottom,var(--indigo),transparent);animation:pulse 2s infinite}
+
+/* SHARED */
+section{padding:120px 0}
+.container{max-width:1160px;margin:0 auto;padding:0 48px}
+.s-tag{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);margin-bottom:16px}
+.s-title{font-family:var(--font-head);font-size:clamp(34px,4.5vw,60px);font-weight:800;letter-spacing:-1.5px;line-height:1.05;color:var(--white)}
+.s-title em{font-style:normal;color:var(--indigo-light)}
+
+/* SERVICES — no arrows */
+#services{background:var(--bg2)}
+.services-top{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;margin-bottom:72px}
+.services-top p{color:var(--muted);font-size:17px;line-height:1.8;max-width:400px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.tile{padding:52px 44px;background:var(--card-bg);position:relative;cursor:default;transition:all .5s var(--ease);overflow:hidden;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.tile:nth-child(2n){border-right:none}
+.tile:nth-child(n+3){border-bottom:none}
+.tile:hover{background:rgba(91,79,232,0.07);transform:translateY(-3px)}
+.tile-glow{position:absolute;width:280px;height:280px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .3s}
+.tile:hover .tile-glow{opacity:1}
+.tile-num{font-family:var(--font-head);font-size:11px;font-weight:700;color:var(--indigo);letter-spacing:2px;margin-bottom:36px}
+.tile-icon{width:52px;height:52px;margin-bottom:28px;color:var(--indigo-light)}
+.tile-icon svg{width:100%;height:100%}
+.tile-name{font-family:var(--font-head);font-size:24px;font-weight:700;color:var(--white);margin-bottom:16px;line-height:1.2;transition:color .3s}
+.tile:hover .tile-name{color:var(--indigo-light)}
+.tile-desc{color:var(--muted);font-size:14px;line-height:1.75;transform:translateY(6px);opacity:.75;transition:all .4s var(--ease)}
+.tile:hover .tile-desc{transform:translateY(0);opacity:1}
+
+/* PROCESS */
+#process{background:var(--bg)}
+.process-head{text-align:center;max-width:580px;margin:0 auto 96px}
+.process-head p{color:var(--muted);margin-top:20px;font-size:17px;line-height:1.7}
+.process-wrap{position:relative}
+.process-spine{position:absolute;top:28px;left:10%;right:10%;height:1px;background:var(--border)}
+.process-fill{position:absolute;top:0;left:0;width:0%;height:100%;background:linear-gradient(to right,var(--indigo),var(--cyan));transition:width 1.6s var(--ease)}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);position:relative;z-index:1}
+.step{padding:0 16px;text-align:center;opacity:.25;transform:translateY(18px);transition:all .6s var(--ease)}
+.step.on{opacity:1;transform:translateY(0)}
+.step-dot{width:56px;height:56px;border-radius:50%;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;transition:all .5s var(--ease)}
+.step.on .step-dot{background:var(--indigo);border-color:var(--indigo);box-shadow:0 0 28px rgba(91,79,232,.45)}
+.step-n{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--muted);transition:color .4s}
+.step.on .step-n{color:#fff}
+.step-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--white);margin-bottom:10px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* WORK — cards link to live sites */
+#work{background:var(--bg2)}
+.work-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:60px}
+.work-head p{color:var(--muted);font-size:14px;max-width:260px;text-align:right;line-height:1.6}
+.work-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{border-radius:var(--radius);overflow:hidden;cursor:pointer;position:relative;display:block;text-decoration:none}
+.card-img{height:460px;position:relative;overflow:hidden;transition:transform .6s var(--ease)}
+.card:hover .card-img{transform:scale(1.04)}
+.g1{background:linear-gradient(145deg,#0a0a20,#1a1a50,#2a2a80)}
+.g2{background:linear-gradient(145deg,#080d1a,#0d1f3c,#1a3a5c)}
+.card-pattern{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);background-size:48px 48px}
+.card-glyph{position:absolute;font-family:var(--font-head);font-size:120px;font-weight:800;color:rgba(255,255,255,0.05);bottom:20px;right:24px;line-height:1;pointer-events:none;letter-spacing:-4px}
+.card-chip{position:absolute;top:24px;left:24px;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:6px 14px;font-size:11px;color:rgba(255,255,255,.65);letter-spacing:1px}
+/* visit badge — appears on hover */
+.card-visit{position:absolute;top:24px;right:24px;background:rgba(91,79,232,.85);backdrop-filter:blur(10px);border-radius:100px;padding:7px 16px;font-size:11px;font-weight:600;color:#fff;letter-spacing:.5px;opacity:0;transform:translateY(-6px);transition:all .35s var(--ease);display:flex;align-items:center;gap:6px}
+.card:hover .card-visit{opacity:1;transform:translateY(0)}
+.card-visit svg{width:11px;height:11px;stroke:#fff;fill:none}
+.card-info{position:absolute;bottom:0;left:0;right:0;padding:32px;background:linear-gradient(to top,rgba(0,0,0,.9) 60%,transparent);transform:translateY(16px);opacity:0;transition:all .4s var(--ease)}
+.card:hover .card-info{transform:translateY(0);opacity:1}
+.card-tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+.card-name{font-family:var(--font-head);font-size:26px;font-weight:700;color:#fff;margin-bottom:6px}
+.card-sub{font-size:13px;color:rgba(255,255,255,.5)}
+.tnf-lines{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.tnf-lines svg{width:220px;height:220px;opacity:.18}
+.cf-frames{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px}
+.cf-frame{border:1.5px solid rgba(255,255,255,.12);border-radius:4px}
+
+/* NUMBERS */
+#numbers{background:var(--bg)}
+.numbers-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.numbers-left{padding-right:80px;border-right:1px solid var(--border)}
+.numbers-left p{color:var(--muted);font-size:17px;line-height:1.8;margin-top:24px;max-width:380px}
+.numbers-right{padding-left:80px;display:grid;grid-template-columns:1fr 1fr;gap:2px;align-content:start}
+.stat{background:var(--card-bg);border:1px solid var(--border);border-radius:4px;padding:44px 36px;transition:all .4s}
+.stat:hover{background:rgba(91,79,232,.07);border-color:var(--indigo)}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.stat-val{font-family:var(--font-head);font-size:60px;font-weight:800;line-height:1;letter-spacing:-2px;color:var(--white)}
+.stat-val .suf{font-size:32px;color:var(--indigo-light)}
+.stat-note{font-size:13px;color:var(--muted);line-height:1.5;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-style:italic}
+
+/* ABOUT */
+#about{background:var(--bg2)}
+.about-grid{display:grid;grid-template-columns:5fr 7fr;gap:100px;align-items:center}
+.about-visual{position:relative}
+.about-box{height:540px;border-radius:var(--radius);background:linear-gradient(145deg,#0c0c24,#181840);position:relative;overflow:hidden;border:1px solid var(--border)}
+.about-box-inner{position:absolute;inset:20px;border-radius:10px;border:1px solid rgba(91,79,232,.15);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.about-mark{font-family:var(--font-head);font-size:110px;font-weight:800;color:rgba(91,79,232,.1);writing-mode:vertical-rl;letter-spacing:-5px;user-select:none}
+.about-badge{position:absolute;bottom:-20px;right:-20px;background:var(--indigo);color:#fff;border-radius:14px;padding:22px 26px;font-family:var(--font-head);font-size:13px;font-weight:700;line-height:1.5}
+.about-badge strong{font-size:38px;display:block;letter-spacing:-1px;line-height:1}
+.about-body{color:var(--muted);font-size:16px;line-height:1.85;margin-bottom:22px}
+.about-body b{color:var(--white);font-weight:500}
+.pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px}
+.pill{background:var(--card-bg);border:1px solid var(--border);border-radius:100px;padding:8px 18px;font-size:13px;color:var(--muted);transition:all .3s;cursor:default}
+.pill:hover{border-color:var(--indigo);color:var(--white)}
+
+/* CONTACT */
+#contact{background:var(--bg)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:start}
+.contact-left .s-title{margin-bottom:20px}
+.contact-left p{color:var(--muted);font-size:17px;line-height:1.75;margin-bottom:44px}
+.c-detail{display:flex;align-items:flex-start;gap:16px;margin-bottom:22px}
+.c-icon{width:40px;height:40px;border-radius:10px;background:var(--card-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.c-icon svg{width:17px;height:17px;stroke:var(--indigo-light);fill:none}
+.c-text strong{display:block;color:var(--white);font-size:15px;font-weight:500;margin-bottom:2px}
+.c-text span{color:var(--muted);font-size:14px}
+.c-form{background:var(--bg2);border-radius:20px;padding:44px;border:1px solid var(--border)}
+.f-group{margin-bottom:24px}
+.f-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:10px}
+.f-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:15px;color:var(--white);font-family:var(--font-body);outline:none;transition:all .3s}
+.f-input:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(91,79,232,.1)}
+.f-input::placeholder{color:var(--muted)}
+textarea.f-input{resize:vertical;min-height:110px}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.f-submit{width:100%;padding:15px;background:var(--indigo);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font-head);letter-spacing:.5px;transition:all .3s}
+.f-submit:hover{background:var(--indigo-light);transform:translateY(-1px)}
+
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 0 36px}
+.foot-inner{display:flex;justify-content:space-between;align-items:center}
+.foot-logo{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--white);letter-spacing:-.5px}
+.foot-logo span{color:var(--cyan)}
+.foot-tag{color:var(--muted);font-size:13px;margin-top:5px;font-style:italic}
+.foot-links{display:flex;gap:28px}
+.foot-links a{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}
+.foot-links a:hover{color:var(--white)}
+.foot-copy{color:var(--muted);font-size:12px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);text-align:center}
+
+.t-overlay{position:fixed;inset:0;background:var(--indigo);border-radius:50%;transform:scale(0);pointer-events:none;z-index:10000;transition:transform .55s var(--ease)}
+.t-overlay.go{transform:scale(5)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{transform:translateY(110%)}to{transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* HAMBURGER NAV */
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--white);border-radius:2px;transition:all .3s var(--ease)}
+.nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-hamburger.open span:nth-child(2){opacity:0}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;inset:0;background:var(--bg);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:40px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--white);text-decoration:none;letter-spacing:-1px;transition:color .2s}
+.mobile-menu a:hover{color:var(--indigo-light)}
+.mobile-theme-btn{margin-top:20px;background:var(--card-bg);border:1px solid var(--border);border-radius:100px;padding:10px 20px;cursor:pointer;color:var(--muted);font-size:14px;font-family:var(--font-body);display:flex;align-items:center;gap:8px}
+
+/* on touch devices — show card info always, not just on hover */
+@media(hover:none){
+  .card-info{opacity:1;transform:translateY(0)}
+  .card-visit{opacity:1;transform:translateY(0)}
+  .tile-desc{transform:translateY(0);opacity:1}
+}
+
+/* NO CUSTOM CURSOR ON TOUCH */
+@media(hover:none),(pointer:coarse){
+  body{cursor:auto}
+  #cursor,#cursor-ring{display:none}
+}
+
+@media(max-width:960px){
+  /* NAV */
+  nav{padding:16px 20px}
+  nav.scrolled{padding:12px 20px}
+  .nav-links{display:none}
+  .nav-hamburger{display:flex}
+
+  /* SECTIONS */
+  section{padding:72px 0}
+  .container{padding:0 20px}
+
+  /* HERO */
+  .hero-title{letter-spacing:-1px}
+  .hero-sub{font-size:15px;margin-bottom:36px}
+  .hero-cta{flex-direction:column;align-items:center;gap:12px}
+  .hero-cta .btn-primary,.hero-cta .btn-ghost{width:100%;max-width:280px;text-align:center}
+  .hero-scroll{margin-top:36px}
+
+  /* SERVICES */
+  .services-top{grid-template-columns:1fr;gap:20px;margin-bottom:48px}
+  .tiles{grid-template-columns:1fr}
+  .tile{padding:36px 28px;border-right:none !important}
+  .tile:not(:last-child){border-bottom:1px solid var(--border) !important}
+  .tile:last-child{border-bottom:none !important}
+
+  /* PROCESS */
+  .process-head{margin-bottom:60px}
+  .process-spine{display:none}
+  .steps{grid-template-columns:1fr;gap:0}
+  .step{display:grid;grid-template-columns:56px 1fr;gap:20px;text-align:left;padding:24px 0;border-bottom:1px solid var(--border)}
+  .step:last-child{border-bottom:none}
+  .step-dot{margin:0;width:48px;height:48px;flex-shrink:0}
+  .step-n{font-size:14px}
+  .step-content{padding-top:4px}
+
+  /* WORK */
+  .work-head{flex-direction:column;gap:16px;align-items:flex-start}
+  .work-head p{text-align:left;max-width:100%}
+  .work-grid{grid-template-columns:1fr;gap:16px}
+  .card-img{height:280px}
+
+  /* NUMBERS */
+  .numbers-grid{grid-template-columns:1fr;gap:0}
+  .numbers-left{padding-right:0;border-right:none;border-bottom:1px solid var(--border);padding-bottom:52px;margin-bottom:52px}
+  .numbers-right{padding-left:0;grid-template-columns:1fr 1fr}
+  .stat{padding:28px 20px}
+  .stat-val{font-size:44px}
+  .stat-val .suf{font-size:24px}
+
+  /* ABOUT */
+  .about-grid{grid-template-columns:1fr;gap:48px}
+  .about-box{height:280px}
+  .about-mark{font-size:72px}
+  .about-badge{bottom:16px;right:16px;padding:16px 20px;position:relative;display:inline-block;margin-top:16px}
+  .about-badge strong{font-size:28px}
+  .about-visual{margin-bottom:16px}
+
+  /* CONTACT */
+  .contact-grid{grid-template-columns:1fr;gap:52px}
+  .c-form{padding:28px 20px}
+
+  /* FOOTER */
+  .foot-inner{flex-direction:column;gap:24px;text-align:center}
+  .foot-links{flex-wrap:wrap;justify-content:center;gap:20px}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div class="t-overlay" id="tOverlay"></div>
+
+<nav id="nav">
+  <a href="#" class="nav-logo">Solar<span>Made</span></a>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span id="tIcon">☀</span><span id="tLabel">Light</span>
+    </button>
+  </div>
+  <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="closeMenu()">Services</a>
+  <a href="#work" onclick="closeMenu()">Work</a>
+  <a href="#about" onclick="closeMenu()">About</a>
+  <a href="#contact" onclick="closeMenu()">Contact</a>
+  <button class="mobile-theme-btn" onclick="toggleTheme();closeMenu()">
+    <span id="tIcon2">☀</span> Toggle theme
+  </button>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Websites · Marketing · Content · AI Ads</div>
+    <h1 class="hero-title">
+      <span class="line"><span class="word" style="animation-delay:.4s">We make</span></span>
+      <span class="line"><span class="word" style="animation-delay:.55s">brands</span></span>
+      <span class="line"><span class="word" style="animation-delay:.7s"><em>impossible</em></span></span>
+      <span class="line"><span class="word" style="animation-delay:.85s">to scroll past.</span></span>
+    </h1>
+    <p class="hero-sub">SolarMade builds digital presence for brands that refuse to be background noise — through websites that convert, content that lands, and ad campaigns that think.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})"><span>Start a project →</span></button>
+      <button class="btn-ghost" onclick="document.getElementById('work').scrollIntoView({behavior:'smooth'})">See our work</button>
+    </div>
+    <!-- Scroll indicator sits naturally below CTAs, no collision -->
+    <div class="hero-scroll">
+      <span class="hero-scroll-label">Scroll</span>
+      <div class="scroll-bar"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES — no arrows, purely informational -->
+<section id="services">
+  <div class="container">
+    <div class="services-top reveal">
+      <div>
+        <div class="s-tag">What we do</div>
+        <h2 class="s-title">Four things.<br><em>Done properly.</em></h2>
+      </div>
+      <p>We don't spread thin across twenty disciplines. We do four things at a level most agencies can't match in any of them.</p>
+    </div>
+    <div class="tiles">
+
+      <div class="tile reveal">
+        <div class="tile-glow"></div>
+        <div class="tile-num">01</div>
+        <div class="tile-icon">
+          <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.4">
+            <rect x="4" y="8" width="44" height="30" rx="4"/>
+            <path d="M18 46h16M26 38v8" stroke-linecap="round"/>
+            <path d="M12 20h6M12 26h14M30 20h10" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="tile-name">Website Design &amp; Dev</h3>
+        <p class="tile-desc">Your website is your hardest-working team member. We build fast, sharp, conversion-focused sites — from landing pages to full brand platforms. Clean code, real craft.</p>
+      </div>
+
+      <div class="tile reveal d1">
+        <div class="tile-glow"></div>
+        <div class="tile-num">02</div>
+        <div class="tile-icon">
+          <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M10 34l10-16 8 9 6-7 8 14"/>
+            <rect x="4" y="4" width="44" height="44" rx="5"/>
+            <circle cx="16" cy="18" r="4"/>
+          </svg>
+        </div>
+        <h3 class="tile-name">Digital Marketing</h3>
+        <p class="tile-desc">Meta Ads, social strategy, audience building — managed with obsession. We don't run campaigns. We build systems that grow.</p>
+      </div>
+
+      <div class="tile reveal">
+        <div class="tile-glow"></div>
+        <div class="tile-num">03</div>
+        <div class="tile-icon">
+          <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.4">
+            <rect x="6" y="6" width="28" height="36" rx="4"/>
+            <rect x="18" y="14" width="28" height="36" rx="4"/>
+            <path d="M24 24h14M24 30h10" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="tile-name">Content Creation</h3>
+        <p class="tile-desc">Reels, carousels, shoots, scripts. Content made for the algorithm and the human on the other side of it. We've created for fashion, film, hospitality, and live performance.</p>
+      </div>
+
+      <div class="tile reveal d1">
+        <div class="tile-glow"></div>
+        <div class="tile-num">04</div>
+        <div class="tile-icon">
+          <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.4">
+            <circle cx="26" cy="26" r="8"/>
+            <path d="M26 6v8M26 38v8M6 26h8M38 26h8"/>
+            <path d="M12.7 12.7l5.6 5.6M33.7 33.7l5.6 5.6M12.7 39.3l5.6-5.6M33.7 18.3l5.6-5.6"/>
+          </svg>
+        </div>
+        <h3 class="tile-name">AI Ads</h3>
+        <p class="tile-desc">Smarter creative. Faster testing. Better returns. We use AI to build ad campaigns that adapt, iterate, and outperform anything made the old way.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="container">
+    <div class="process-head reveal">
+      <div class="s-tag">How we think</div>
+      <h2 class="s-title">Five steps.<br><em>No guesswork.</em></h2>
+      <p>A process built on honesty, not hustle theatre. We move fast because we think first.</p>
+    </div>
+    <div class="process-wrap" id="procWrap">
+      <div class="process-spine"><div class="process-fill" id="procFill"></div></div>
+      <div class="steps">
+        <div class="step"><div class="step-dot"><span class="step-n">01</span></div><div class="step-content"><h4 class="step-title">Listen</h4><p class="step-desc">We ask the uncomfortable questions before touching a single tool.</p></div></div>
+        <div class="step"><div class="step-dot"><span class="step-n">02</span></div><div class="step-content"><h4 class="step-title">Position</h4><p class="step-desc">Audience, platform, message. The angle before the execution.</p></div></div>
+        <div class="step"><div class="step-dot"><span class="step-n">03</span></div><div class="step-content"><h4 class="step-title">Create</h4><p class="step-desc">Design, copy, content — built in parallel, not in sequence.</p></div></div>
+        <div class="step"><div class="step-dot"><span class="step-n">04</span></div><div class="step-content"><h4 class="step-title">Launch</h4><p class="step-desc">We go live with a plan, not a hope.</p></div></div>
+        <div class="step"><div class="step-dot"><span class="step-n">05</span></div><div class="step-content"><h4 class="step-title">Optimise</h4><p class="step-desc">Publish is not the finish line. We read the data and move fast.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK — cards open live websites -->
+<section id="work">
+  <div class="container">
+    <div class="work-head reveal">
+      <div>
+        <div class="s-tag">Selected work</div>
+        <h2 class="s-title">Built.<br><em>Shipped. Remembered.</em></h2>
+      </div>
+      <p>Every project is a permanent record.<br>Here's ours.</p>
+    </div>
+    <div class="work-grid">
+
+      <a class="card reveal" href="https://thenativefolks.com" target="_blank" rel="noopener">
+        <div class="card-img g1">
+          <div class="card-pattern"></div>
+          <div class="tnf-lines">
+            <svg viewBox="0 0 200 200" fill="none" stroke="white" stroke-width="1">
+              <rect x="20" y="20" width="160" height="160" rx="8"/>
+              <rect x="40" y="40" width="120" height="120" rx="4"/>
+              <line x1="20" y1="100" x2="180" y2="100"/>
+              <line x1="100" y1="20" x2="100" y2="180"/>
+              <circle cx="100" cy="100" r="30"/>
+            </svg>
+          </div>
+          <div class="card-glyph">TNF</div>
+        </div>
+        <div class="card-chip">Craft · 2024</div>
+        <div class="card-visit">
+          Visit site
+          <svg viewBox="0 0 12 12" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10L10 2M10 2H5M10 2v5"/></svg>
+        </div>
+        <div class="card-info">
+          <div class="card-tag">Website · Brand</div>
+          <div class="card-name">The Native Folks</div>
+          <div class="card-sub">A site as considered as the products it represents</div>
+        </div>
+      </a>
+
+      <a class="card reveal d1" href="https://cinereafilms.com" target="_blank" rel="noopener">
+        <div class="card-img g2">
+          <div class="card-pattern"></div>
+          <div class="cf-frames">
+            <div class="cf-frame" style="width:60px;height:80px"></div>
+            <div class="cf-frame" style="width:80px;height:110px"></div>
+            <div class="cf-frame" style="width:60px;height:80px"></div>
+          </div>
+          <div class="card-glyph">CF</div>
+        </div>
+        <div class="card-chip">Film · 2024</div>
+        <div class="card-visit">
+          Visit site
+          <svg viewBox="0 0 12 12" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10L10 2M10 2H5M10 2v5"/></svg>
+        </div>
+        <div class="card-info">
+          <div class="card-tag">Website · Portfolio</div>
+          <div class="card-name">Cinerea Films</div>
+          <div class="card-sub">Cinematic platform with dynamic director portfolio</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- NUMBERS -->
+<section id="numbers">
+  <div class="container">
+    <div class="numbers-grid">
+      <div class="numbers-left reveal">
+        <div class="s-tag">Numbers that matter</div>
+        <h2 class="s-title">We measure<br><em>outcomes.</em><br>Not outputs.</h2>
+        <p>Slides don't ship. Decks don't grow revenue. Everything we make is evaluated on what actually moved — and we're happy to show our working.</p>
+        <button class="btn-primary" style="margin-top:44px;display:inline-flex;align-items:center;gap:8px" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})"><span>Let's talk →</span></button>
+      </div>
+      <div class="numbers-right">
+        <div class="stat reveal">
+          <div class="stat-label">Brands worked with</div>
+          <div class="stat-val counter" data-target="10"><span class="sc">0</span><span class="suf">+</span></div>
+          <div class="stat-note">Fashion, film, hospitality, theatre — across categories and budgets.</div>
+        </div>
+        <div class="stat reveal d1">
+          <div class="stat-label">Disciplines</div>
+          <div class="stat-val counter" data-target="4"><span class="sc">0</span><span class="suf"></span></div>
+          <div class="stat-note">Websites, marketing, content, AI ads — all under one roof.</div>
+        </div>
+        <div class="stat reveal d2">
+          <div class="stat-label">Years building</div>
+          <div class="stat-val counter" data-target="3"><span class="sc">0</span><span class="suf">+</span></div>
+          <div class="stat-note">In the open, iterating in public, getting better with every project.</div>
+        </div>
+        <div class="stat reveal d3">
+          <div class="stat-label">Excuses for mediocrity</div>
+          <div class="stat-val counter" data-target="0"><span class="sc">0</span><span class="suf"></span></div>
+          <div class="stat-note">The work either clears the bar or we go back and fix it.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="about-box">
+          <div class="about-box-inner">
+            <div class="about-mark">SM</div>
+          </div>
+        </div>
+        <div class="about-badge">
+          <strong>4</strong>
+          things.<br>Done properly.
+        </div>
+      </div>
+      <div class="reveal d1">
+        <div class="s-tag">About</div>
+        <h2 class="s-title" style="margin-bottom:32px">A small team<br><em>with zero tolerance</em><br>for average.</h2>
+        <p class="about-body">SolarMade started with a simple frustration: most digital agencies overpromise, underdeliver, and disappear after the invoice.</p>
+        <p class="about-body">We do four things well — websites, marketing, content, and AI-powered ads. <b>No bloat. No account managers playing telephone.</b> Just people who care about the work and know how to ship it.</p>
+        <p class="about-body">The name is a mindset. Solar — clarity, energy, no shadows. <b>Every project we touch gets that treatment.</b></p>
+        <p class="about-body">We work best with brands that have something worth saying and need a team that knows how to say it.</p>
+        <div class="pills">
+          <span class="pill">Outcomes first</span>
+          <span class="pill">Craft over comfort</span>
+          <span class="pill">Ship &gt; perfect</span>
+          <span class="pill">No filler work</span>
+          <span class="pill">Honest by default</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="reveal">
+        <div class="s-tag">Contact</div>
+        <h2 class="s-title" style="margin-bottom:20px">Got a project?<br><em>Let's talk.</em></h2>
+        <p>Tell us what you're building. We'll tell you how we'd approach it. No pitch decks, no retainer traps — just an honest conversation.</p>
+        <div class="c-detail">
+          <div class="c-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8l10 7 10-7"/></svg></div>
+          <div class="c-text"><strong>hello@solarmade.in</strong><span>We read every email.</span></div>
+        </div>
+        <div class="c-detail">
+          <div class="c-icon"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div class="c-text"><strong>Remote · Worldwide</strong><span>We work across time zones without excuses.</span></div>
+        </div>
+      </div>
+      <div class="c-form reveal d1">
+        <div class="f-row">
+          <div class="f-group"><label class="f-label">First name</label><input type="text" class="f-input" placeholder="Alex"></div>
+          <div class="f-group"><label class="f-label">Last name</label><input type="text" class="f-input" placeholder="Chen"></div>
+        </div>
+        <div class="f-group"><label class="f-label">Email</label><input type="email" class="f-input" placeholder="alex@yourbrand.com"></div>
+        <div class="f-group"><label class="f-label">What do you need?</label><input type="text" class="f-input" placeholder="Website / Marketing / Content / AI Ads"></div>
+        <div class="f-group"><label class="f-label">Tell us more</label><textarea class="f-input" placeholder="What's the brand? What's the goal? Any context helps."></textarea></div>
+        <button class="f-submit">Send it →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-inner">
+      <div>
+        <div class="foot-logo">Solar<span>Made</span></div>
+        <div class="foot-tag">Your story. Our obsession.</div>
+      </div>
+      <div class="foot-links">
+        <a href="#services">Services</a>
+        <a href="#work">Work</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+    <div class="foot-copy">© 2025 SolarMade. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+// HAMBURGER MENU
+function toggleMenu(){
+  const h=document.getElementById('hamburger'),m=document.getElementById('mobileMenu');
+  h.classList.toggle('open');m.classList.toggle('open');
+  document.body.style.overflow=m.classList.contains('open')?'hidden':'';
+}
+function closeMenu(){
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// CURSOR
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function ar(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(ar);})();
+
+// HERO CANVAS
+const canvas=document.getElementById('hero-canvas'),ctx=canvas.getContext('2d');
+let W,H;
+const mouse={x:400,y:300};
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();
+window.addEventListener('resize',resize);
+document.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+class P{
+  constructor(){this.reset();}
+  reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-.5)*.5;this.vy=(Math.random()-.5)*.5;this.r=Math.random()*1.8+.4;this.o=Math.random()*.45+.1;}
+  update(){
+    const dx=this.x-mouse.x,dy=this.y-mouse.y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<140&&d>0){const f=.6*(1-d/140);this.vx+=dx/d*f;this.vy+=dy/d*f;}
+    this.vx*=.97;this.vy*=.97;this.x+=this.vx;this.y+=this.vy;
+    if(this.x<0)this.x=W;if(this.x>W)this.x=0;
+    if(this.y<0)this.y=H;if(this.y>H)this.y=0;
+  }
+}
+const pts=[];
+for(let i=0;i<90;i++)pts.push(new P());
+(function draw(){
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<pts.length;i++){
+    pts[i].update();
+    ctx.beginPath();ctx.arc(pts[i].x,pts[i].y,pts[i].r,0,Math.PI*2);
+    ctx.fillStyle='rgba(91,79,232,'+pts[i].o+')';ctx.fill();
+    for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<150){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(91,79,232,'+(0.12*(1-d/150))+')';ctx.lineWidth=.6;ctx.stroke();}
+    }
+  }
+  requestAnimationFrame(draw);
+})();
+
+// NAV SCROLL
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>50),{passive:true});
+
+// THEME
+let dark=true;
+function toggleTheme(){
+  const o=document.getElementById('tOverlay');
+  o.style.transformOrigin='top right';
+  o.classList.add('go');
+  setTimeout(()=>{
+    dark=!dark;
+    document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+    document.getElementById('tLabel').textContent=dark?'Light':'Dark';
+    document.getElementById('tIcon').textContent=dark?'☀':'☾';
+    o.classList.remove('go');
+  },280);
+}
+
+// REVEAL ON SCROLL
+const ro=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in');}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+// PROCESS STEPS
+const stepEls=document.querySelectorAll('.step'),pFill=document.getElementById('procFill');
+new IntersectionObserver(e=>{
+  e.forEach(x=>{
+    if(x.isIntersecting){
+      stepEls.forEach((s,i)=>setTimeout(()=>{s.classList.add('on');pFill.style.width=((i+1)/stepEls.length*100)+'%';},i*180));
+    }
+  });
+},{threshold:.25}).observe(document.getElementById('procWrap'));
+
+// COUNTERS
+const co=new IntersectionObserver(e=>{
+  e.forEach(x=>{
+    if(x.isIntersecting){
+      const t=parseFloat(x.target.dataset.target),dec=t%1!==0,el=x.target.querySelector('.sc'),s=performance.now();
+      (function u(n){const p=Math.min((n-s)/1800,1),v=t*(1-Math.pow(1-p,3));el.textContent=dec?v.toFixed(1):Math.round(v);if(p<1)requestAnimationFrame(u);})(s);
+      co.unobserve(x.target);
+    }
+  });
+},{threshold:.5});
+document.querySelectorAll('.counter').forEach(c=>co.observe(c));
+
+// TILE MOUSE GLOW
+document.querySelectorAll('.tile').forEach(tile=>{
+  tile.addEventListener('mousemove',e=>{
+    const r=tile.getBoundingClientRect(),g=tile.querySelector('.tile-glow'),x=e.clientX-r.left,y=e.clientY-r.top;
+    g.style.cssText=`width:300px;height:300px;top:${y-150}px;left:${x-150}px;background:radial-gradient(circle at center,rgba(91,79,232,.22),transparent 70%);opacity:1;position:absolute;border-radius:50%;pointer-events:none;`;
+  });
+  tile.addEventListener('mouseleave',()=>tile.querySelector('.tile-glow').style.opacity='0');
+});
+</script>
+</body>
+</html>
